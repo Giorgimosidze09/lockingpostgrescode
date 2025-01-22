@@ -1,0 +1,441 @@
+basePath: /api/v1
+definitions:
+  authHandler.LoginRequest:
+    description: The request body for user login
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  authHandler.LoginResponse:
+    description: The response containing the JWT token
+    properties:
+      token:
+        type: string
+    type: object
+  authHandler.RegisterRequest:
+    description: The request body for user registration
+    properties:
+      password:
+        type: string
+      role_id:
+        description: Change role_id to an integer
+        type: integer
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: http://www.example.com/support
+  description: API for managing accounts with withdrawal, deposit, and exchange operations.
+  title: Account Management API
+  version: "1.0"
+paths:
+  /admindeposit:
+    post:
+      description: Handles deposit requests based on the role of the user
+      parameters:
+      - description: Client User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      - description: Amount
+        in: query
+        name: amount
+        required: true
+        type: number
+      - description: Currency (USD/GEL)
+        in: query
+        name: currency
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Deposit successful
+          schema:
+            type: string
+        "201":
+          description: Deposit request created successfully
+          schema:
+            type: string
+        "400":
+          description: Error message
+          schema:
+            type: string
+        "403":
+          description: Access denied
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Deposit funds
+      tags:
+      - ADMIN
+  /adminexchange:
+    post:
+      description: Exchange currency from one type to another
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      - description: Amount
+        in: query
+        name: amount
+        required: true
+        type: number
+      - description: From Currency (USD/GEL)
+        in: query
+        name: from_currency
+        required: true
+        type: string
+      - description: To Currency (USD/GEL)
+        in: query
+        name: to_currency
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Exchange successful
+          schema:
+            type: string
+        "400":
+          description: Error message
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Exchange currency
+      tags:
+      - ADMIN
+  /adminwithdraw:
+    post:
+      description: Withdraw funds from a user account
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      - description: Amount
+        in: query
+        name: amount
+        required: true
+        type: number
+      - description: Currency (USD/GEL)
+        in: query
+        name: currency
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Withdrawal successful
+          schema:
+            type: string
+        "400":
+          description: Error message
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Withdraw funds
+      tags:
+      - ADMIN
+  /deposit:
+    post:
+      description: Handles deposit requests based on the role of the user
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      - description: Amount
+        in: query
+        name: amount
+        required: true
+        type: number
+      - description: Currency (USD/GEL)
+        in: query
+        name: currency
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Deposit successful
+          schema:
+            type: string
+        "201":
+          description: Deposit request created successfully
+          schema:
+            type: string
+        "400":
+          description: Error message
+          schema:
+            type: string
+        "403":
+          description: Access denied
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Deposit funds
+      tags:
+      - Client
+  /deposit/handle:
+    post:
+      description: Support can either accept or reject a pending deposit request
+      parameters:
+      - description: Request ID
+        in: query
+        name: request_id
+        required: true
+        type: integer
+      - description: Action (accept/reject)
+        in: query
+        name: action
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Request status updated successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "403":
+          description: Access denied
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Support accepts or rejects a deposit request
+      tags:
+      - Support
+  /exchange:
+    post:
+      description: Exchange currency from one type to another
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      - description: Amount
+        in: query
+        name: amount
+        required: true
+        type: number
+      - description: From Currency (USD/GEL)
+        in: query
+        name: fromcurrency
+        required: true
+        type: string
+      - description: To Currency (USD/GEL)
+        in: query
+        name: tocurrency
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Exchange successful
+          schema:
+            type: string
+        "400":
+          description: Error message
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Exchange currency
+      tags:
+      - Client
+  /exchange/handle:
+    post:
+      description: Support can either accept or reject a pending deposit request
+      parameters:
+      - description: Request ID
+        in: query
+        name: request_id
+        required: true
+        type: integer
+      - description: Action (accept/reject)
+        in: query
+        name: action
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Request status updated successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "403":
+          description: Access denied
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Support accepts or rejects a deposit request
+      tags:
+      - Support
+  /history/{user_id}:
+    get:
+      description: Fetch account history for a user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "400":
+          description: Error message
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get account history
+      tags:
+      - ADMIN
+  /login:
+    post:
+      description: Logs in a user and returns a JWT token
+      parameters:
+      - description: Login Request
+        in: body
+        name: loginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/authHandler.LoginRequest'
+      responses:
+        "200":
+          description: Login successful, JWT token returned
+          schema:
+            $ref: '#/definitions/authHandler.LoginResponse'
+        "400":
+          description: Invalid credentials
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: User login
+      tags:
+      - AUTH
+  /register:
+    post:
+      description: Registers a new user by providing username and password
+      parameters:
+      - description: Register Request
+        in: body
+        name: registerRequest
+        required: true
+        schema:
+          $ref: '#/definitions/authHandler.RegisterRequest'
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Register a new user
+      tags:
+      - AUTH
+  /withdraw:
+    post:
+      description: Withdraw funds from a user account
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      - description: Amount
+        in: query
+        name: amount
+        required: true
+        type: number
+      - description: Currency (USD/GEL)
+        in: query
+        name: currency
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Withdrawal successful
+          schema:
+            type: string
+        "400":
+          description: Error message
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Withdraw funds
+      tags:
+      - Client
+  /withdraw/handle:
+    post:
+      description: Support can either accept or reject a pending deposit request
+      parameters:
+      - description: Request ID
+        in: query
+        name: request_id
+        required: true
+        type: integer
+      - description: Action (accept/reject)
+        in: query
+        name: action
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Request status updated successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "403":
+          description: Access denied
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Support accepts or rejects a deposit request
+      tags:
+      - Support
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
