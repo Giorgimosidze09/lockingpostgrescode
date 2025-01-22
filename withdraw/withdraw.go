@@ -39,7 +39,6 @@ func Withdraw(db *sql.DB, userID int, amount float64, currency string) error {
 		return fmt.Errorf("failed to update balance: %v", err)
 	}
 
-	// Log the operation
 	_, err = tx.Exec(`
 INSERT INTO accounts_history (user_id, operation_type, amount, currency, status, created_at, usd_balance, usd_blocked_balance, gel_balance, gel_blocked_balance)
 SELECT user_id, $1, $2, $3, 'approved', $4, usd_balance, usd_blocked_balance, gel_balance, gel_blocked_balance

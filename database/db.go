@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/lib/pq" // PostgreSQL driver
+	_ "github.com/lib/pq"
 )
 
 const (
@@ -15,7 +15,6 @@ const (
 	dbName     = "locking"
 )
 
-// ConnectDB returns a new database connection
 func ConnectDB() (*sql.DB, error) {
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		dbHost, dbPort, dbUser, dbPassword, dbName)

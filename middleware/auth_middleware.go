@@ -9,24 +9,20 @@ import (
 	"lockingpostgrescode/auth"
 )
 
-// AuthMiddleware is a middleware function that validates the JWT token
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Get the token from the Authorization header
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			http.Error(w, "Authorization header missing", http.StatusUnauthorized)
 			return
 		}
 
-		// Split the header to get the token
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		if tokenString == authHeader { // No "Bearer" prefix
+		if tokenString == authHeader {
 			http.Error(w, "Authorization header format must be Bearer {token}", http.StatusUnauthorized)
 			return
 		}
 
-		// Validate the token
 		claims, err := auth.ValidateToken(tokenString)
 		if err != nil {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)
@@ -34,13 +30,11 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		// Add the claims to the request context
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, "user_id", claims.UserID)
 		ctx = context.WithValue(ctx, "role", claims.Role)
 		r = r.WithContext(ctx)
 
-		// Call the next handler
 		next.ServeHTTP(w, r)
 	})
 }

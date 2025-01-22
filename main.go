@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	db "lockingpostgrescode/database"
-	_ "lockingpostgrescode/docs" // Import generated docs
+	_ "lockingpostgrescode/docs"
 	"lockingpostgrescode/handlers"
 
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -25,7 +25,6 @@ import (
 // @name Authorization
 
 func main() {
-	// Connect to the database
 	db, err := db.ConnectDB()
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
@@ -34,7 +33,6 @@ func main() {
 
 	r := handlers.SetupRoutes(db)
 
-	// Swagger docs
 	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	log.Println("Server running at http://localhost:8080")

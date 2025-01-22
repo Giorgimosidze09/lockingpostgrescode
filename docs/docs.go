@@ -665,7 +665,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "role_id": {
-                    "description": "Change role_id to an integer",
                     "type": "integer"
                 },
                 "username": {
