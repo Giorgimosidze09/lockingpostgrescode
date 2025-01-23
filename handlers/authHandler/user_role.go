@@ -22,7 +22,7 @@ type UserRoleResponse struct {
 // @Failure 500 {string} string "Internal server error"
 // @Router /role [get]
 func RoleHandler(w http.ResponseWriter, r *http.Request) {
-	// Extract token from the Authorization header
+	// First, apply the authentication middleware
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
