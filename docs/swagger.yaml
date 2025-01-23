@@ -1,5 +1,15 @@
 basePath: /api/v1
 definitions:
+  admin.AdminRegisterRequest:
+    description: The request body for user registration
+    properties:
+      password:
+        type: string
+      role_id:
+        type: integer
+      username:
+        type: string
+    type: object
   authHandler.LoginRequest:
     description: The request body for user login
     properties:
@@ -15,13 +25,15 @@ definitions:
         type: string
     type: object
   authHandler.RegisterRequest:
-    description: The request body for user registration
     properties:
       password:
         type: string
-      role_id:
-        type: integer
       username:
+        type: string
+    type: object
+  authHandler.UserRoleResponse:
+    properties:
+      role:
         type: string
     type: object
 host: localhost:8080
@@ -113,6 +125,34 @@ paths:
       summary: Exchange currency
       tags:
       - ADMIN
+  /adminregister:
+    post:
+      description: Registers a new user by providing username and password
+      parameters:
+      - description: Register Request
+        in: body
+        name: AdminRegisterRequest
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminRegisterRequest'
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Register a new user
+      tags:
+      - ADMIN
   /adminwithdraw:
     post:
       description: Withdraw funds from a user account
@@ -148,13 +188,8 @@ paths:
       - ADMIN
   /deposit:
     post:
-      description: Handles deposit requests based on the role of the user
+      description: Handles deposit requests for logged-in users
       parameters:
-      - description: User ID
-        in: query
-        name: user_id
-        required: true
-        type: integer
       - description: Amount
         in: query
         name: amount
@@ -223,11 +258,6 @@ paths:
     post:
       description: Exchange currency from one type to another
       parameters:
-      - description: User ID
-        in: query
-        name: user_id
-        required: true
-        type: integer
       - description: Amount
         in: query
         name: amount
@@ -367,15 +397,35 @@ paths:
       summary: Register a new user
       tags:
       - AUTH
+  /role:
+    get:
+      description: Retrieves user role based on provided token
+      parameters:
+      - description: Authorization Token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: User role retrieved successfully
+          schema:
+            $ref: '#/definitions/authHandler.UserRoleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get user role by token
+      tags:
+      - AUTH
   /withdraw:
     post:
       description: Withdraw funds from a user account
       parameters:
-      - description: User ID
-        in: query
-        name: user_id
-        required: true
-        type: integer
       - description: Amount
         in: query
         name: amount
@@ -402,7 +452,7 @@ paths:
       - Client
   /withdraw/handle:
     post:
-      description: Support can either accept or reject a pending deposit request
+      description: Support can either accept or reject a pending withdrawal request
       parameters:
       - description: Request ID
         in: query
@@ -429,7 +479,7 @@ paths:
             type: string
       security:
       - BearerAuth: []
-      summary: Support accepts or rejects a deposit request
+      summary: Support accepts or rejects a withdrawal request
       tags:
       - Support
 securityDefinitions:

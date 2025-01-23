@@ -21,7 +21,6 @@ import (
 // @Failure 403 {string} string "Access denied"
 // @Router /admindeposit [post]
 func AdminDepositHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	userID, _ := strconv.Atoi(r.URL.Query().Get("user_id"))
 	role, ok := r.Context().Value("role").(string)
 	if !ok {
 		http.Error(w, "Unauthorized access", http.StatusUnauthorized)

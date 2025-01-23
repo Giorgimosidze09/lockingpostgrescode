@@ -140,6 +140,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/adminregister": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Registers a new user by providing username and password",
+                "tags": [
+                    "ADMIN"
+                ],
+                "summary": "Register a new user",
+                "parameters": [
+                    {
+                        "description": "Register Request",
+                        "name": "AdminRegisterRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminRegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/adminwithdraw": {
             "post": {
                 "security": [
@@ -198,19 +243,12 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Handles deposit requests based on the role of the user",
+                "description": "Handles deposit requests for logged-in users",
                 "tags": [
                     "Client"
                 ],
                 "summary": "Deposit funds",
                 "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "query",
-                        "required": true
-                    },
                     {
                         "type": "number",
                         "description": "Amount",
@@ -317,13 +355,6 @@ const docTemplate = `{
                 ],
                 "summary": "Exchange currency",
                 "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "query",
-                        "required": true
-                    },
                     {
                         "type": "number",
                         "description": "Amount",
@@ -533,6 +564,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/role": {
+            "get": {
+                "description": "Retrieves user role based on provided token",
+                "tags": [
+                    "AUTH"
+                ],
+                "summary": "Get user role by token",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User role retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/authHandler.UserRoleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/withdraw": {
             "post": {
                 "security": [
@@ -546,13 +615,6 @@ const docTemplate = `{
                 ],
                 "summary": "Withdraw funds",
                 "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "query",
-                        "required": true
-                    },
                     {
                         "type": "number",
                         "description": "Amount",
@@ -591,11 +653,11 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Support can either accept or reject a pending deposit request",
+                "description": "Support can either accept or reject a pending withdrawal request",
                 "tags": [
                     "Support"
                 ],
-                "summary": "Support accepts or rejects a deposit request",
+                "summary": "Support accepts or rejects a withdrawal request",
                 "parameters": [
                     {
                         "type": "integer",
@@ -636,6 +698,21 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "admin.AdminRegisterRequest": {
+            "description": "The request body for user registration",
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "authHandler.LoginRequest": {
             "description": "The request body for user login",
             "type": "object",
@@ -658,16 +735,20 @@ const docTemplate = `{
             }
         },
         "authHandler.RegisterRequest": {
-            "description": "The request body for user registration",
             "type": "object",
             "properties": {
                 "password": {
                     "type": "string"
                 },
-                "role_id": {
-                    "type": "integer"
-                },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "authHandler.UserRoleResponse": {
+            "type": "object",
+            "properties": {
+                "role": {
                     "type": "string"
                 }
             }

@@ -8,10 +8,10 @@ import (
 	"strconv"
 )
 
-// AcceptRejectDepositRequest handles accepting or rejecting deposit requests
+// AcceptRejectWithdrawRequest handles accepting or rejecting withdrawal requests
 // @Tags Support
-// @Summary Support accepts or rejects a deposit request
-// @Description Support can either accept or reject a pending deposit request
+// @Summary Support accepts or rejects a withdrawal request
+// @Description Support can either accept or reject a pending withdrawal request
 // @Security BearerAuth
 // @Param request_id query int true "Request ID"
 // @Param action query string true "Action (accept/reject)"
@@ -48,8 +48,9 @@ func AcceptRejectWithdrawRequest(w http.ResponseWriter, r *http.Request, db *sql
 	var amount float64
 	var currency string
 
+	// Use COALESCE to handle potential NULL values
 	err = db.QueryRow(`
-		SELECT user_id, amount, currency 
+		SELECT user_id, amount, COALESCE(currency, '') 
 		FROM requests 
 		WHERE id = $1 AND status = 'pending'`, requestID).Scan(&clientUserID, &amount, &currency)
 	if err != nil {
@@ -75,10 +76,13 @@ func AcceptRejectWithdrawRequest(w http.ResponseWriter, r *http.Request, db *sql
 		return
 	}
 
-	err = withdraw.Withdraw(db, clientUserID, amount, currency)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	// Call the withdraw function only if the request is accepted
+	if action == "accept" {
+		err = withdraw.Withdraw(db, clientUserID, amount, currency)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 	}
 
 	w.WriteHeader(http.StatusOK)

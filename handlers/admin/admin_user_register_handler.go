@@ -1,47 +1,46 @@
-package authHandler
+package admin
 
 import (
 	"encoding/json"
 	db "lockingpostgrescode/database"
 	"log"
 	"net/http"
-	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 // RegisterRequest represents the structure of the registration request body
-type RegisterRequest struct {
+// @Description The request body for user registration
+type AdminRegisterRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+	RoleID   int    `json:"role_id"`
 }
 
 // @Summary Register a new user
-// @Tags AUTH
+// @Tags ADMIN
+// @Security BearerAuth
 // @Description Registers a new user by providing username and password
-// @Param registerRequest body authHandler.RegisterRequest true "Register Request"
+// @Param AdminRegisterRequest body admin.AdminRegisterRequest true "Register Request"
 // @Success 201 {string} string "User registered successfully"
 // @Failure 400 {string} string "Invalid request body"
 // @Failure 500 {string} string "Internal server error"
-// @Router /register [post]
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	var req RegisterRequest
+// @Router /adminregister [post]
+func AdminRegisterHandler(w http.ResponseWriter, r *http.Request) {
+	var req AdminRegisterRequest
 
-	// Decode the request body
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	// Hash the password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		http.Error(w, "Error hashing password", http.StatusInternalServerError)
 		return
 	}
 
-	// Connect to the database
 	db, err := db.ConnectDB()
 	if err != nil {
 		log.Println("Error connecting to the database:", err)
@@ -50,28 +49,12 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	// Insert the user and get the generated user_id
-	var userID int
-	err = db.QueryRow(`
-		INSERT INTO users (username, password_hash, role_id) 
-		VALUES ($1, $2, 3) RETURNING id`, req.Username, string(hashedPassword)).Scan(&userID)
+	_, err = db.Exec("INSERT INTO users (username, password_hash, role_id) VALUES ($1, $2, $3)", req.Username, string(hashedPassword), req.RoleID)
 	if err != nil {
-		log.Println("Error inserting user:", err)
 		http.Error(w, "Failed to register user", http.StatusInternalServerError)
 		return
 	}
 
-	// Create an account for the new user
-	_, err = db.Exec(`
-		INSERT INTO accounts (user_id, usd_balance, usdblocked, gel_balance, gelblocked, created_at, updated_at, usd_blocked_balance, gel_blocked_balance) 
-		VALUES ($1, 0, 0, 0, 0, $2, $3, 0, 0)`, userID, time.Now(), time.Now())
-	if err != nil {
-		log.Println("Error creating account for user:", err)
-		http.Error(w, "Failed to create account for user", http.StatusInternalServerError)
-		return
-	}
-
-	// Respond with success
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("User registered successfully"))
 }
