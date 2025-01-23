@@ -20,8 +20,6 @@ func SetupRoutes(db *sql.DB) *mux.Router {
 
 	r.HandleFunc("/api/v1/login", auth.LoginHandler).Methods("POST", "OPTIONS")
 
-	r.HandleFunc("/api/v1/role", auth.RoleHandler).Methods("POST", "OPTIONS")
-
 	//client
 	r.Handle("/api/v1/withdraw", middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		client.WithdrawHandler(w, r, db)
